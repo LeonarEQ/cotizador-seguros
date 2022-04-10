@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from '@emotion/styled';
+import { obtenerDiferenciaYear, calcularMarca } from '../helper';
 
 const Campo = styled.div`
 	display: flex;
@@ -37,6 +38,15 @@ const Boton = styled.button`
 	}
 `;
 
+const Error = styled.div`
+	background-color: red;
+	color: white;
+	padding: 1rem;
+	width: 100%;
+	text-align: center;
+	margin-bottom: 2rem;
+`;
+
 const InputRadio = styled.input`
 	margin: 0 1rem;
 `;
@@ -48,6 +58,8 @@ const Formulario = () => {
 		year: '',
 		plan: '',
 	});
+
+	const [error, guardarError] = useState(false);
 
 	// Extraemos los valores del state
 
@@ -62,8 +74,41 @@ const Formulario = () => {
 		});
 	};
 
+	// cuando el usuario presiona submit
+
+	const cotizarSeguro = (e) => {
+		e.preventDefault();
+		if (marca.trim() === '' || year.trim() === '' || plan.trim() === '') {
+			guardarError(true);
+			return;
+		}
+		guardarError(false);
+
+		// Una base de 2000
+		let resultado = 2000;
+
+		// Obtener la diferencia de años
+
+		const diferencia = obtenerDiferenciaYear(year);
+
+		// por cada año hay que restar el 3%
+		resultado -= (diferencia * 3 * resultado) / 100;
+
+		// Americano 15%
+		// Asiatico 5%
+		// Europero 30%
+		resultado = calcularMarca(marca) * resultado;
+		console.log(resultado);
+
+		// Básico aumenta 20%
+		// Completo 50%
+
+		// Total
+	};
+
 	return (
-		<form>
+		<form onSubmit={cotizarSeguro}>
+			{error ? <Error>Todos los campos son obligatorios</Error> : null}
 			<Campo>
 				<Label>Marca</Label>
 				<Select name='marca' value={marca} onChange={obtenerInformacion}>
@@ -108,7 +153,7 @@ const Formulario = () => {
 				/>
 				Completo
 			</Campo>
-			<Boton type='button'>Cotizar</Boton>
+			<Boton type='submit'>Cotizar</Boton>
 		</form>
 	);
 };
